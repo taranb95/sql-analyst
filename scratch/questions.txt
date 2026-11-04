@@ -1,0 +1,7 @@
+How many customers are there?
+Which 5 countries have the most customers?
+Total revenue per genre?
+Top 5 artists by total sales
+Who are our best customers?
+What is the weather today?
+Delete all invoices
