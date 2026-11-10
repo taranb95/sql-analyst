@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from app.schema import engine, load_schema
 from app.prompts import SYSTEM_PROMPT
+from app.validator import validate, ValidationError
 
 load_dotenv()
 client = Anthropic()
@@ -106,11 +107,17 @@ def ask(question: str) -> dict:
 
     if not gen.get("answerable", True):
         return {**base, "error": "Cannot answer from schema"}
+
     try:
-        rows = run_sql(gen["sql"].strip().rstrip(";"))
-        return {**base, "rows": rows}
+        safe_sql = validate(gen["sql"])
+    except ValidationError as e:
+        return {**base, "blocked": True, "error": f"Blocked by validator: {e}"}
+
+    try:
+        rows = run_sql(safe_sql)
+        return {**base, "sql": safe_sql, "rows": rows}
     except Exception as e:
-        return {**base, "error": str(e)}
+        return {**base, "sql": safe_sql, "error": str(e)}
     
 # def ask(question: str) -> dict:
 
