@@ -5,7 +5,7 @@ from anthropic import Anthropic
 from sqlalchemy import text
 from dotenv import load_dotenv
 
-from app.schema import engine, load_schema
+from app.schema import engine, load_schema, get_table_names
 from app.prompts import SYSTEM_PROMPT
 from app.validator import validate, ValidationError
 
@@ -109,7 +109,7 @@ def ask(question: str) -> dict:
         return {**base, "error": "Cannot answer from schema"}
 
     try:
-        safe_sql = validate(gen["sql"])
+        safe_sql = validate(gen["sql"], allowed_tables=get_table_names())
     except ValidationError as e:
         return {**base, "blocked": True, "error": f"Blocked by validator: {e}"}
 

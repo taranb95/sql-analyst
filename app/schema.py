@@ -21,6 +21,15 @@ def load_schema() -> str:
         f'TABLE "{t}" ({", ".join(cols)})' for t, cols in tables.items()
     )
 
-
+def get_table_names() -> set[str]:
+    """Names of tables the assistant is allowed to query (lowercased)."""
+    query = text("""
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+    """)
+    with engine.connect() as conn:
+        return {row[0].lower() for row in conn.execute(query)}
+    
 if __name__ == "__main__":
     print(load_schema())
